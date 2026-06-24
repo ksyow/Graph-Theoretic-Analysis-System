@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph Theoretical Analysis System (GTAS)</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body onload="updateFeatureAvailability(); updateConnectivityTheory();">
+    <h1 style="text-align:center;">Graph Theoretical Analysis System (GTAS)</h1>
+
+    <!-- Graph Type -->
+<div class="graph-type-container">
+
+    <label class="graph-option">
+    <input type="radio"
+           name="graphType"
+           value="undirected"
+           checked
+           onclick="updateFeatureAvailability(); updateConnectivityTheory();">
+
+    <span>Undirected</span>
+</label>
+
+<label class="graph-option">
+    <input type="radio"
+           name="graphType"
+           value="directed"
+           onclick="updateFeatureAvailability(); updateConnectivityTheory();">
+
+    <span>Directed</span>
+</label>
+</div>
+
+    <!-- Inputs -->
+    <div class="input-box">
+        <input type="text"
+               id="vertices"
+               placeholder="Vertices: a,b,c,d">
+    </div>
+
+    <div class="input-box">
+        <input type="text"
+               id="edges"
+               placeholder="Edges: a-b,b-c,c-d">
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+
+    <button data-feature="planarity"
+            onclick="switchTab('planarity', this)">
+        Planarity
+    </button>
+
+    <button data-feature="connectivity"
+            onclick="switchTab('connectivity', this)">
+        Connectivity
+    </button>
+
+    <button data-feature="tutte"
+            onclick="switchTab('tutteTab', this)">
+        Tutte Polynomial
+    </button>
+
+    <button data-feature="chromatic"
+            onclick="switchTab('chromaticTab', this)">
+        Chromatic Number
+    </button>
+
+    <button data-feature="centrality"
+            onclick="switchTab('centralityTab', this)">
+        Centrality
+    </button>
+
+    <button data-feature="shortestPath"
+            onclick="switchTab('shortestTab', this)">
+        Shortest Path
+    </button>
+
+    <button data-feature="eccentricity"
+            onclick="switchTab('eccTab', this)">
+        Eccentricity
+    </button>
+</div>
+
+    <!-- ================= PLANARITY ================= -->
+    <div id="planarity" class="tab">
+
+        <button id="btnPlanarity" onclick="checkPlanarity()">
+            Check Planarity
+        </button>
+
+        <p id="planarityResult"></p>
+        <p id="explanation"></p>
+
+        <h3>Graph Visualization</h3>
+
+    <div class="graph-controls">
+    <button onclick="zoomIn('planarityGraph')">Zoom In</button>
+    <button onclick="zoomOut('planarityGraph')">Zoom Out</button>
+    <button onclick="resetView('planarityGraph')">Reset View</button>
+    </div>
+
+    <div id="planarityGraph" class="graph-box"></div>
+        <div class="feature-info">
+
+            <h3>What is Planarity?</h3>
+
+            <p>
+                A <b>planar</b> graph is a graph that can be drawn on the plane
+                without any edge crossings.
+            </p>
+
+            <p>
+                The complete graph K₅ and bipartite graph K₃,₃ are two classic
+                examples of non-planar graphs, also known as
+                <b>Kuratowski graphs</b>.
+            </p>
+
+            <h4>Properties of Planar Graphs</h4>
+
+            <ul>
+                <li>
+                    A planar graph can be drawn without edge crossings.
+                </li>
+
+                <li>
+                    Connected planar graphs satisfy Euler’s formula, that is for a connected planar graph with \(V\) vertices, \(E\) edges and \(F\) faces, the graph satisfies the formula:
+                    <p>
+                        \[
+                        V - E + F = 2
+                        \]
+                    </p>
+                </li>
+
+                <li>
+                    For a connected planar graph with V vertices and E edges:
+                    \[
+                    E \leq 3V - 6
+                    \]
+                </li>
+
+                <li>
+                    Planar graphs divide the plane into faces.
+                </li>
+            </ul>
+
+            <h4>Kuratowski's Theorem</h4>
+
+            <p>
+                A graph is planar if and only if it does not contain a subdivision of K₅ or K₃,₃. Symbolically, we can write this statement as:
+            </p>
+
+            <p>
+                \[
+                G \text{ is planar } \iff G \text{ contains no subdivision of } K_5 \text{ or } K_{3,3}
+                \]
+            </p>
+
+            <p>
+                The theorem is significant because it indicates that a graph is not planar if we find a subdivision of K₅ or K₃,₃.
+            </p>
+        </div>
+    </div>
+
+    <!-- ================= CONNECTIVITY ================= -->
+    <div id="connectivity" class="tab" style="display:none;">
+
+    <button id="btnConnectivity" onclick="checkConnectivity()">
+        Check Connectivity
+    </button>
+
+    <p id="connectivityResult"></p>
+
+    <h3>Graph Visualization</h3>
+    <div class="graph-controls">
+    <button onclick="zoomIn('connectivityGraph')">Zoom In</button>
+    <button onclick="zoomOut('connectivityGraph')">Zoom Out</button>
+    <button onclick="resetView('connectivityGraph')">Reset View</button>
+    </div>
+
+    <div id="connectivityGraph" class="graph-box"></div>
+
+    <div class="feature-info">
+
+        <!-- UNDIRECTED -->
+        <div id="undirectedConnectivityTheory">
+            <h3>What is Connectivity in Undirected Graphs?</h3>
+
+            <p>A graph is said to be <b>connected</b> if every two vertices are joined by a path.</p>
+
+            <p>The graph that is not connected is called a disconnected graph.</p>
+
+            <h4>Properties of Connected Graphs</h4>
+            <ul>
+                <li>Any simple graph with \(n\) vertices and more than \((n - 1)(n - 2)/2\) edges is connected.</li>
+                <li>Connected planar graphs satisfy Euler’s formula: \(V - E + F = 2\)</li>
+                <li>\(E \leq 3V - 6\)</li>
+            </ul>
+
+            <h3>Edge Connectivity</h3>
+            <p>\(\lambda(G)\): minimum edges needed to disconnect graph.</p>
+
+            <h3>Vertex Connectivity</h3>
+            <p>\(\kappa(G)\): minimum vertices needed to disconnect graph.</p>
+        </div>
+
+        <!-- DIRECTED -->
+        <div id="directedConnectivityTheory" style="display:none;">
+            <h3>What is Connectivity in Directed Graphs?</h3>
+
+            <p>There are two types: strongly connected and weakly connected.</p>
+
+            <h3>Strongly Connected</h3>
+            <p>
+                For every \(u,v\), there exists a directed path \(u \to v\) and \(v \to u\).
+            </p>
+
+            <h3>Weakly Connected</h3>
+            <p>
+                If we ignore edge directions and the graph becomes connected.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+    <!-- ================= TUTTE ================= -->
+    <div id="tutteTab" class="tab" style="display:none;">
+
+        <button id="btnTutte" onclick="checkTutte()">
+            Compute Tutte Polynomial
+        </button>
+
+        <p id="tutteResult"></p>
+
+        <h3>Graph Visualization</h3>
+        <div class="graph-controls">
+    <button onclick="zoomIn('tutteGraph')">Zoom In</button>
+    <button onclick="zoomOut('tutteGraph')">Zoom Out</button>
+    <button onclick="resetView('tutteGraph')">Reset View</button>
+    </div>
+
+    <div id="tutteGraph" class="graph-box"></div>
+
+        <div class="feature-info">
+        <h3>What is the Tutte Polynomial?</h3>
+
+        <p>
+            The <b>Tutte polynomial</b> is a two-variable polynomial
+            associated with a graph. It is one of the most important
+            graph polynomials in graph theory because it contains
+            significant combinatorial information about a graph.
+        </p>
+
+        <p>
+            The Tutte polynomial of a graph \(G\) is denoted by:
+        </p>
+
+        <p>
+            \[
+            T(G;x,y)
+            \]
+        </p>
+
+        <p>
+            Many graph invariants such as spanning trees,
+            spanning forests, connected spanning subgraphs,
+            and chromatic-related properties can be obtained
+            from special evaluations of the Tutte polynomial.
+        </p>
+
+        <!-- ===================================== -->
+        <h3>Deletion-Contraction Definition</h3>
+
+        <p>
+            The Tutte polynomial satisfies the recursive
+            deletion-contraction relation:
+        </p>
+
+        <p>
+            \[
+            T(G;x,y)
+            =
+            T(G-e;x,y)
+            +
+            T(G/e;x,y)
+            \]
+        </p>
+
+        <ul>
+            <li>
+                \(G-e\) denotes the graph obtained by deleting edge \(e\).
+            </li>
+
+            <li>
+                \(G/e\) denotes the graph obtained by contracting edge \(e\).
+            </li>
+        </ul>
+
+        <p>
+            This recursive definition is one of the most common methods
+            used to compute the Tutte polynomial.
+        </p>
+
+        <p>
+            If the graph consists only of \(i\) bridges and \(j\) loops,
+            then:
+        </p>
+
+        <p>
+            \[
+            T(G;x,y)=x^i y^j
+            \]
+        </p>
+
+        <!-- ===================================== -->
+        <h3>Rank-Nullity Formula</h3>
+
+        <p>
+            The Tutte polynomial can also be expressed using
+            the rank-nullity generating function:
+        </p>
+
+        <p>
+            \[
+            T(G;x,y)
+            =
+            \sum_{A\subseteq E}
+            (x-1)^{r(E)-r(A)}
+            (y-1)^{n(A)}
+            \]
+        </p>
+
+        <ul>
+            <li>
+                \(A \subseteq E\) means that \(A\) is a subset of edges.
+            </li>
+
+            <li>
+                \(r(A)\) denotes the rank of the subgraph.
+            </li>
+
+            <li>
+                \(n(A)\) denotes the nullity of the subgraph.
+            </li>
+        </ul>
+
+        <p>
+            This formulation is useful in combinatorial counting
+            and theoretical analysis.
+        </p>
+
+        <!-- ===================================== -->
+        <h3>Special Evaluations of the Tutte Polynomial</h3>
+
+        <p>
+            Several important graph quantities can be obtained
+            by evaluating the Tutte polynomial at specific points.
+        </p>
+
+        <ul>
+
+            <li>
+                \[
+                T(G;1,1)=\tau(G)
+                \]
+                equals the number of spanning trees of \(G\).
+            </li>
+
+            <li>
+                \[
+                T(G;2,1)
+                \]
+                equals the number of spanning forests of \(G\).
+            </li>
+
+            <li>
+                \[
+                T(G;1,2)
+                \]
+                equals the number of connected spanning subgraphs of \(G\).
+            </li>
+
+            <li>
+                \[
+                T(G;2,2)=2^{|E|}
+                \]
+                where \(|E|\) denotes the number of edges of \(G\).
+            </li>
+
+        </ul>
+
+        <!-- ===================================== -->
+        <h3>Properties of the Tutte Polynomial</h3>
+
+        <ul>
+
+            <li>
+                The Tutte polynomial is independent of the order
+                in which edges are deleted or contracted.
+            </li>
+
+            <li>
+                The coefficients of the Tutte polynomial
+                are non-negative integers.
+            </li>
+
+            <li>
+                The Tutte polynomial generalizes many
+                important graph invariants.
+            </li>
+
+            <li>
+                For planar graphs, the Tutte polynomial
+                satisfies a duality relation with the dual graph.
+            </li>
+
+        </ul>
+    </div>
+</div>
+
+    <!-- ================= CHROMATIC ================= -->
+    <div id="chromaticTab" class="tab" style="display:none;">
+
+        <button id="btnChromatic" onclick="checkChromatic()">
+            Compute Chromatic Number
+        </button>
+
+        <p id="chromatic"></p>
+        <p id="coloring"></p>
+
+        <h3>Graph Visualization</h3>
+    <div class="graph-controls">
+    <button onclick="zoomIn('chromaticGraph')">Zoom In</button>
+    <button onclick="zoomOut('chromaticGraph')">Zoom Out</button>
+    <button onclick="resetView('chromaticGraph')">Reset View</button>
+    </div>
+
+    <div id="chromaticGraph" class="graph-box"></div>
+        <div class="feature-info">
+
+            <h3>What is Chromatic Number?</h3>
+
+            <p>
+                The chromatic number of a graph \(G\), represented as \(\chi(G)\), is the smallest number of colours needed to colour its vertices so that no two adjacent vertices have the same colour.
+            </p>
+            
+            <h3>Chromatic Numbers of Common Graphs</h3>
+
+    <ul>
+
+        <li>
+            <b>Complete Graph \(K_n\)</b>
+            <br>
+            Every vertex is adjacent to all other vertices,
+            therefore:
+            \[
+            \chi(K_n)=n
+            \]
+        </li>
+
+        <br>
+
+        <li>
+            <b>Cycle Graph \(C_n\)</b>
+            <br>
+
+            If the cycle length is even:
+            \[
+            \chi(C_n)=2
+            \]
+
+            If the cycle length is odd:
+            \[
+            \chi(C_n)=3
+            \]
+        </li>
+
+        <br>
+
+        <li>
+            <b>Bipartite Graph</b>
+            <br>
+
+            Any non-empty bipartite graph
+            can be colored using two colors:
+            \[
+            \chi(G)=2
+            \]
+
+            A graph is bipartite if and only if
+            it is 2-colorable.
+        </li>
+
+        <br>
+
+        <li>
+            <b>Star Graph</b>
+            <br>
+
+            A star graph is bipartite,
+            therefore:
+            \[
+            \chi(G)=2
+            \]
+        </li>
+
+        <br>
+
+        <li>
+            <b>Wheel Graph \(W_n\)</b>
+            <br>
+
+            If the number of vertices is even:
+            \[
+            \chi(W_n)=3
+            \]
+
+            If the number of vertices is odd:
+            \[
+            \chi(W_n)=4
+            \]
+        </li>
+
+        <br>
+
+        <li>
+            <b>Tree</b>
+            <br>
+
+            Every tree with at least one edge
+            satisfies:
+            \[
+            \chi(T)=2
+            \]
+        </li>
+
+        <br>
+
+        <li>
+            <b>Planar Graph</b>
+            <br>
+
+            By the Four Color Theorem:
+            \[
+            \chi(G)\leq 4
+            \]
+        </li>
+
+        <br>
+
+        <li>
+            <b>Edgeless Graph</b>
+            <br>
+
+            If a graph contains no edges,
+            then only one color is needed:
+            \[
+            \chi(G)=1
+            \]
+        </li>
+
+    </ul>
+
+    <!-- ====================================== -->
+
+    <h3>Properties of the Chromatic Number</h3>
+
+    <ul>
+
+        <li>
+            The chromatic number is always
+            at least the size of the largest clique
+            in the graph.
+        </li>
+
+        <li>
+            A graph with chromatic number 2
+            is called <b>bicolorable</b>.
+        </li>
+
+        <li>
+            A graph with chromatic number 3
+            is called <b>three-colorable</b>.
+        </li>
+
+        <li>
+            According to Brooks’ Theorem,
+            the chromatic number of a graph is at most
+            the maximum vertex degree,
+            except for complete graphs
+            and odd cycles.
+        </li>
+
+        <li>
+            Determining the chromatic number
+            of a graph is generally a difficult
+            combinatorial optimization problem.
+        </li>
+
+    </ul>
+        </div>
+    </div>
+
+    <!-- ================= CENTRALITY ================= -->
+    <div id="centralityTab" class="tab" style="display:none;">
+
+        <button id="btnCentrality" onclick="checkCentrality()">
+            Compute Centrality
+        </button>
+
+        <p id="centralityResult"></p>
+
+        <h3>Graph Visualization</h3>
+        <div class="graph-controls">
+    <button onclick="zoomIn('centralityGraph')">Zoom In</button>
+    <button onclick="zoomOut('centralityGraph')">Zoom Out</button>
+    <button onclick="resetView('centralityGraph')">Reset View</button>
+    </div>
+
+        <div id="centralityGraph" class="graph-box"></div>
+            
+        <div class="feature-info">
+
+            <h3>What is Centrality?</h3>
+
+            <p>
+                In graph theory, the significance of nodes in a network is assessed using centrality measures. They aid in determining whether nodes are significant information carriers, powerful, or well-connected.
+            </p>
+            <p>
+                Each node in a graph is given a numerical value by centrality measurements according to its significance within the network.
+            </p>
+                <p>
+        Centrality is widely used in social networks,
+        transportation systems, communication networks,
+        biology, and information analysis.
+    </p>
+
+    <h3>Degree Centrality</h3>
+
+    <p>
+        Degree centrality measures how many edges
+        are connected to a vertex.
+    </p>
+
+    <p>
+        For a graph with \(n\) vertices:
+    </p>
+
+    <p>
+        \[
+        C_D(v)=\frac{\deg(v)}{n-1}
+        \]
+    </p>
+
+    <ul>
+        <li>
+            \(\deg(v)\) is the number of edges connected to vertex \(v\). We known it as degree of vertex \(v\).
+        </li>
+        <li>
+            Vertices with high degree centrality
+            are directly connected to many vertices.
+        </li>
+
+        <li>
+            In directed graphs, degree centrality
+            can be divided into:
+            <ul>
+                <li>In-degree centrality</li>
+                <li>Out-degree centrality</li>
+            </ul>
+        </li>
+
+    </ul>
+
+    <h3>Betweenness Centrality</h3>
+
+    <p>
+        Betweenness centrality measures how often
+        a vertex lies on shortest paths between
+        other pairs of vertices.
+    </p>
+
+    <p>
+        \[
+        C_B(v)=
+        \sum_{s \neq v \neq t}
+        \frac{\sigma_{st}(v)}{\sigma_{st}}
+        \]
+    </p>
+
+    <ul>
+
+        <li>
+            \(\sigma_{st}\) is the number of shortest
+            paths between vertices \(s\) and \(t\).
+        </li>
+
+        <li>
+            \(\sigma_{st}(v)\) is the number of those
+            shortest paths passing through \(v\).
+        </li>
+
+        <li>
+            Vertices with high betweenness centrality
+            often act as bridges or connectors.
+        </li>
+
+    </ul>
+
+
+    <h3>Closeness Centrality</h3>
+
+    <p>
+        Closeness centrality measures how close
+        a vertex is to all other vertices in the graph.
+    </p>
+
+    <p>
+        \[
+        C_C(v)=
+        \frac{n-1}
+        {\sum_{u \neq v} d(v,u)}
+        \]
+    </p>
+
+    <ul>
+
+        <li>
+            \(d(v,u)\) denotes the shortest-path
+            distance between vertices \(v\) and \(u\).
+        </li>
+
+        <li>
+            Vertices with high closeness centrality
+            can quickly interact with other vertices.
+        </li>
+
+    </ul>
+
+    <h3>Properties of Centrality Measures</h3>
+
+    <ul>
+
+        <li>
+            Different centrality measures may identify
+            different important vertices.
+        </li>
+
+        <li>
+            Centrality values are usually normalized
+            between 0 and 1.
+        </li>
+
+        <li>
+            High degree centrality does not necessarily
+            imply high betweenness centrality.
+        </li>
+
+        <li>
+            Centrality measures help identify
+            influential or critical vertices in a network.
+        </li>
+
+    </ul>
+        </div>
+    </div>
+
+    <!-- ================= SHORTEST PATH ================= -->
+    <div id="shortestTab" class="tab" style="display:none;">
+
+        <input type="text" id="source" placeholder="Source node">
+        <input type="text" id="target" placeholder="Target node">
+
+        <br><br>
+
+        <button id="btnShortest" onclick="checkShortestPath()">
+            Find Shortest Path
+        </button>
+
+        <p id="shortestResult"></p>
+
+        <h3>Graph Visualization</h3>
+        <div class="graph-controls">
+    <button onclick="zoomIn('shortestGraph')">Zoom In</button>
+    <button onclick="zoomOut('shortestGraph')">Zoom Out</button>
+    <button onclick="resetView('shortestGraph')">Reset View</button>
+    </div>
+
+        <div id="shortestGraph" class="graph-box"></div>
+
+        <div class="feature-info">
+
+            <h3>What is a Shortest Path?</h3>
+
+    <p>
+        A <b>path</b> in a graph is a sequence of vertices
+        connected by edges.
+    </p>
+
+    <p>
+        The <b>shortest path</b> between two vertices
+        is the path with the minimum distance or cost.
+    </p>
+
+    <h3>Basic Terminology</h3>
+
+    <ul>
+
+        <li>
+            <b>Walk</b><br>
+            A sequence of vertices and edges where
+            vertices or edges may be repeated.
+        </li>
+
+        <br>
+
+        <li>
+            <b>Path</b><br>
+            A sequence of connected vertices
+            with no repeated vertices.
+        </li>
+
+        <br>
+
+        <li>
+            <b>Unweighted Graph</b><br>
+            A graph where all edges are treated equally.
+            The shortest path is the path containing
+            the fewest number of edges.
+        </li>
+
+        <br>
+
+        <li>
+            <b>Weighted Graph</b><br>
+            A graph where edges are assigned numerical
+            values such as distance, time, or cost.
+        </li>
+
+        <br>
+
+        <li>
+            <b>Path Weight</b><br>
+            The total cost of a path obtained by summing
+            the weights of all edges along the path.
+        </li>
+
+    </ul>
+
+    <h3>Shortest Path Distance</h3>
+
+    <p>
+        The shortest path distance between vertices
+        \(u\) and \(v\) is commonly denoted by:
+    </p>
+
+    <p>
+        \[
+        d(u,v)
+        \]
+    </p>
+
+    <p>
+        where \(d(u,v)\) represents the minimum distance
+        between the two vertices.
+    </p>
+
+    <h3>Properties of Shortest Paths</h3>
+
+    <ul>
+
+        <li>
+            A shortest path is not necessarily unique.
+        </li>
+
+        <li>
+            In an unweighted graph, shortest paths
+            minimize the number of edges.
+        </li>
+
+        <li>
+            In weighted graphs, shortest paths minimize
+            the total edge weight.
+        </li>
+
+        <li>
+            If no path exists between two vertices,
+            the distance is undefined or infinite.
+        </li>
+
+    </ul>
+        </div>
+    </div>
+
+    <!-- ================= ECCENTRICITY ================= -->
+    <div id="eccTab" class="tab" style="display:none;">
+
+        <button id="btnEccentricity" onclick="checkEccentricity()">
+            Compute Eccentricity
+        </button>
+
+        <p id="eccResult"></p>
+
+        <h3>Graph Visualization</h3>
+        <div class="graph-controls">
+    <button onclick="zoomIn('eccGraph')">Zoom In</button>
+    <button onclick="zoomOut('eccGraph')">Zoom Out</button>
+    <button onclick="resetView('eccGraph')">Reset View</button>
+        </div>
+        <div id="eccGraph" class="graph-box"></div>
+
+        <div class="feature-info">
+<h3>What is Eccentricity?</h3>
+
+<p>
+    The <b>eccentricity</b> of a vertex \(v\) is the greatest shortest-path distance
+    from \(v\) to any other vertex in the graph.
+</p>
+
+<p>
+    In other words, eccentricity measures how far a vertex is from the most distant
+    vertex reachable from it.
+</p>
+
+<p>
+    Mathematically:
+</p>
+
+$$
+\epsilon(v)=\max_{u\in V} d(v,u)
+$$
+
+<ul>
+    <li>
+        \(d(v,u)\) is the shortest-path distance between vertices \(v\) and \(u\).
+    </li>
+
+    <li>
+        A vertex with small eccentricity is considered more “central” in the graph.
+    </li>
+</ul>
+
+<h3>Related Concepts</h3>
+
+<ul>
+    <li>
+        <b>Radius \((rad(G))\):</b><br>
+        The minimum eccentricity among all vertices in the graph.
+
+        $$
+        rad(G)=\min_{v\in V}\epsilon(v)
+        $$
+
+        Vertices whose eccentricity equals the radius are called the
+        <b>center</b> (or central vertices).
+    </li>
+
+    <li>
+        <b>Diameter \((diam(G))\):</b><br>
+        The maximum eccentricity among all vertices in the graph.
+
+        $$
+        diam(G)=\max_{v\in V}\epsilon(v)
+        $$
+
+        It represents the largest shortest-path distance in the graph.
+    </li>
+
+    <li>
+        <b>Center:</b><br>
+        The set of vertices whose eccentricity equals the radius.
+    </li>
+
+    <li>
+        <b>Periphery:</b><br>
+        The set of vertices whose eccentricity equals the diameter.
+    </li>
+</ul>
+
+<h3>Important Notes</h3>
+
+<ul>
+    <li>
+        In a <b>connected undirected graph</b>, every vertex has a finite eccentricity.
+    </li>
+
+    <li>
+        In a <b>disconnected graph</b>, some vertices cannot reach others, so distances
+        may be considered infinite.
+    </li>
+
+    <li>
+        For <b>directed graphs</b>, eccentricity is usually defined only for
+        <b>strongly connected graphs</b>, where every vertex can reach every other vertex.
+    </li>
+
+    <li>
+        For any connected graph:
+
+        $$
+        rad(G)\le diam(G)\le 2\,rad(G)
+        $$
+    </li>
+</ul>
+</div>
+
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+
+</body>
+</html>
